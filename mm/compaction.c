@@ -23,6 +23,11 @@
 #include <linux/freezer.h>
 #include <linux/page_owner.h>
 #include <linux/psi.h>
+#include <linux/msm_drm_notify.h>
+#include <linux/moduleparam.h>
+#include <linux/time.h>
+#include <linux/workqueue.h>
+#include <drm/drm_panel.h>
 #include "internal.h"
 
 #ifdef CONFIG_COMPACTION
@@ -2400,6 +2405,93 @@ enum compact_result try_to_compact_pages(gfp_t gfp_mask, unsigned int order,
 	return rc;
 }
 
+/*
+ * Compact all zones within a node till each zone's fragmentation score
+ * reaches within proactive compaction thresholds (as determined by the
+ * proactiveness tunable).
+ *
+ * It is possible that the function returns before reaching score targets
+ * due to various back-off conditions, such as, contention on per-node or
+ * per-zone locks.
+ */
+static void proactive_compact_node(pg_data_t *pgdat)
+{
+	int zoneid;
+	struct zone *zone;
+	struct compact_control cc = {
+		.order = -1,
+		.mode = MIGRATE_SYNC_LIGHT,
+		.ignore_skip_hint = true,
+		.whole_zone = true,
+		.gfp_mask = GFP_KERNEL,
+		.proactive_compaction = true,
+	};
+
+	for (zoneid = 0; zoneid < MAX_NR_ZONES; zoneid++) {
+		zone = &pgdat->node_zones[zoneid];
+		if (!populated_zone(zone))
+			continue;
+
+		cc.zone = zone;
+
+		compact_zone(&cc, NULL);
+
+		VM_BUG_ON(!list_empty(&cc.freepages));
+		VM_BUG_ON(!list_empty(&cc.migratepages));
+	}
+}
+static struct workqueue_struct *compaction_wq;
+static struct delayed_work compaction_work;
+static bool screen_on = true;
+static int compaction_timeout_ms = 900000;
+module_param_named(compaction_forced_timeout_ms,
+		     compaction_timeout_ms, int, 0644);
+static int compaction_soff_delay_ms = 3000;
+module_param_named(compaction_screen_off_delay_ms,
+		     compaction_soff_delay_ms, int, 0644);
+static unsigned long compaction_forced_timeout;
+
+
+static int msm_drm_notifier_callback(struct notifier_block *self,
+				       unsigned long event, void *data)
+{
+	struct msm_drm_notifier *evdata = data;
+	int *blank;
+
+	if (event != MSM_DRM_EVENT_BLANK && event != MSM_DRM_EARLY_EVENT_BLANK)
+		goto out;
+
+	if (!evdata || !evdata->data)
+		goto out;
+
+	blank = evdata->data;
+	switch (*blank) {
+	case MSM_DRM_BLANK_POWERDOWN_CUST:
+	case MSM_DRM_BLANK_POWERDOWN:
+	case MSM_DRM_BLANK_NORMAL:
+		if (!screen_on)
+			goto out;
+		screen_on = false;
+		if (time_after(jiffies, compaction_forced_timeout) && !delayed_work_busy(&compaction_work)) {
+			compaction_forced_timeout = jiffies + msecs_to_jiffies(compaction_timeout_ms);
+			queue_delayed_work(compaction_wq, &compaction_work,
+					   msecs_to_jiffies(compaction_soff_delay_ms));
+		}
+		break;
+	case MSM_DRM_BLANK_UNBLANK_CUST:
+		if (screen_on)
+			goto out;
+		screen_on = true;
+		break;
+	}
+
+out:
+	return NOTIFY_OK;
+}
+
+static struct notifier_block compaction_notifier_block = {
+	.notifier_call = msm_drm_notifier_callback,
+};
 
 /* Compact all zones within a node */
 static void compact_node(int nid)
@@ -2757,5 +2849,25 @@ static int __init kcompactd_init(void)
 	return 0;
 }
 subsys_initcall(kcompactd_init)
+
+extern struct drm_panel *lcd_active_panel;
+
+static int  __init scheduled_compaction_init(void)
+{
+	compaction_wq = create_freezable_workqueue("compaction_wq");
+
+	if (!compaction_wq)
+		return -EFAULT;
+
+	INIT_DELAYED_WORK(&compaction_work, do_compaction);
+
+	if (lcd_active_panel) {
+		drm_panel_notifier_register(lcd_active_panel,
+					    &compaction_notifier_block);
+	}
+
+	return 0;
+}
+late_initcall(scheduled_compaction_init);
 
 #endif /* CONFIG_COMPACTION */
