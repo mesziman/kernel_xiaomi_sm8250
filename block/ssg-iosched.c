@@ -736,6 +736,8 @@ static void ssg_prepare_request(struct request *rq, struct bio *bio)
 {
 	struct ssg_data *ssg = rq->q->elevator->elevator_data;
 	struct ssg_request_info *rqi;
+	struct cgroup_subsys_state *css;
+	struct blkcg *blkcg;
 
 	atomic_inc(&ssg->allocated_rqs);
 
@@ -744,8 +746,16 @@ static void ssg_prepare_request(struct request *rq, struct bio *bio)
 		set_thread_group_info(rqi);
 
 		rcu_read_lock();
-		rqi->blkg = blkg_lookup(css_to_blkcg(blkcg_css()), rq->q);
+		css = kthread_blkcg();
+	        if (css)
+	            blkcg = css_to_blkcg(css);
+		else
+		    blkcg = css_to_blkcg(task_css(current, io_cgrp_id));
+		if (!blkcg)
+			goto out;
+		rqi->blkg = blkg_lookup(blkcg, rq->q);
 		ssg_blkcg_inc_rq(rqi->blkg);
+out:
 		rcu_read_unlock();
 	}
 
