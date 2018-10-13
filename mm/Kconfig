@@ -263,6 +263,9 @@ config COMPACTION
           it and then we would be really interested to hear about that at
           linux-mm@kvack.org.
 
+config VMSTAT_INTERVAL
+	int "Default interval in seconds to update vmstat"
+	default 1
 #
 # support for page migration
 #
