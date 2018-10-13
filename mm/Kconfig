@@ -281,6 +281,10 @@ config PROCESS_RECLAIM
 	 (echo all > /proc/PID/reclaim) reclaims all pages.
 
 	 Any other value is ignored.
+
+config VMSTAT_INTERVAL
+	int "Default interval in seconds to update vmstat"
+	default 1
 #
 # support for page migration
 #
