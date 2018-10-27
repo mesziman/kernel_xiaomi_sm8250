@@ -659,7 +659,7 @@ static bool ssg_bio_merge(struct request_queue *q, struct bio *bio,
 	bool ret;
 
 	spin_lock(&ssg->lock);
-	ret = blk_mq_sched_try_merge(q, bio, nr_segs, &free);
+	ret = blk_mq_sched_try_merge(q, bio, &free);
 	spin_unlock(&ssg->lock);
 
 	if (free)
