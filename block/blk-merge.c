@@ -184,7 +184,7 @@ static unsigned get_max_segment_size(struct request_queue *q,
  */
 static bool bvec_split_segs(struct request_queue *q, struct bio_vec *bv,
 		unsigned *nsegs, unsigned *last_seg_size,
-		unsigned *front_seg_size, unsigned *sectors)
+		unsigned *front_seg_size, unsigned *sectors, unsigned max_segs)
 {
 	unsigned len = bv->bv_len;
 	unsigned total_len = 0;
@@ -194,7 +194,7 @@ static bool bvec_split_segs(struct request_queue *q, struct bio_vec *bv,
 	 * Multi-page bvec may be too big to hold in one segment, so the
 	 * current bvec has to be splitted as multiple segments.
 	 */
-	while (len && new_nsegs + *nsegs < queue_max_segments(q)) {
+	while (len && new_nsegs + *nsegs < max_segs) {
 		seg_size = get_max_segment_size(q, bv->bv_offset + total_len);
 		seg_size = min(seg_size, len);
 
@@ -244,6 +244,7 @@ static struct bio *blk_bio_segment_split(struct request_queue *q,
 	bool do_split = true;
 	struct bio *new = NULL;
 	const unsigned max_sectors = get_max_io_size(q, bio);
+	const unsigned max_segs = queue_max_segments(q);
 
 	bio_for_each_bvec(bv, bio, iter) {
 		/*
@@ -258,14 +259,14 @@ static struct bio *blk_bio_segment_split(struct request_queue *q,
 			 * Consider this a new segment if we're splitting in
 			 * the middle of this vector.
 			 */
-			if (nsegs < queue_max_segments(q) &&
+			if (nsegs < max_segs &&
 			    sectors < max_sectors) {
 				/* split in the middle of bvec */
 				bv.bv_len = (max_sectors - sectors) << 9;
 				bvec_split_segs(q, &bv, &nsegs,
 						&seg_size,
 						&front_seg_size,
-						&sectors);
+						&sectors, max_segs);
 			}
 			goto split;
 		}
@@ -286,16 +287,22 @@ static struct bio *blk_bio_segment_split(struct request_queue *q,
 			continue;
 		}
 new_segment:
-		if (nsegs == queue_max_segments(q))
+		if (nsegs == max_segs)
 			goto split;
 
 		bvprv = bv;
 		bvprvp = &bvprv;
 
-		if (bvec_split_segs(q, &bv, &nsegs, &seg_size,
-				    &front_seg_size, &sectors))
+		if (bv.bv_offset + bv.bv_len <= PAGE_SIZE) {
+			nsegs++;
+			seg_size = bv.bv_len;
+			sectors += bv.bv_len >> 9;
+			if (nsegs == 1 && seg_size > front_seg_size)
+				front_seg_size = seg_size;
+		} else if (bvec_split_segs(q, &bv, &nsegs, &seg_size,
+				    &front_seg_size, &sectors, max_segs)) {
 			goto split;
-
+		}
 	}
 
 	do_split = false;
@@ -416,7 +423,7 @@ new_segment:
 			bvprv = bv;
 			prev = 1;
 			bvec_split_segs(q, &bv, &nr_phys_segs, &seg_size,
-					&front_seg_size, NULL);
+					&front_seg_size, NULL, UINT_MAX);
 		}
 		bbio = bio;
 	}
