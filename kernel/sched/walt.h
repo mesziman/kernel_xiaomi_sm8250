@@ -467,6 +467,14 @@ static inline bool prefer_spread_on_idle(int cpu, bool new_ilb)
 	}
 }
 
+extern int core_ctl_init(void);
+
+#ifdef CONFIG_CPU_FREQ
+extern int cpu_boost_init(void);
+#else
+static inline int cpu_boost_init(void) { }
+#endif
+
 #else /* CONFIG_SCHED_WALT */
 
 static inline bool prefer_spread_on_idle(int cpu)

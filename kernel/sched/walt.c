@@ -2467,6 +2467,13 @@ static void update_all_clusters_stats(void)
 	release_rq_locks_irqrestore(cpu_possible_mask, &flags);
 }
 
+static void walt_rest_init(struct work_struct *work)
+{
+       core_ctl_init();
+       cpu_boost_init();
+}
+static DECLARE_WORK(walt_work, walt_rest_init);
+
 void update_cluster_topology(void)
 {
 	struct cpumask cpus = *cpu_possible_mask;
@@ -2505,6 +2512,7 @@ void update_cluster_topology(void)
 
 	if (cpumask_weight(&asym_cap_sibling_cpus) == 1)
 		cpumask_clear(&asym_cap_sibling_cpus);
+	schedule_work(&walt_work);
 }
 
 static unsigned long cpu_max_table_freq[NR_CPUS];

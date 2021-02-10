@@ -1353,7 +1353,7 @@ static int cluster_init(const struct cpumask *mask)
 	return kobject_add(&cluster->kobj, &dev->kobj, "core_ctl");
 }
 
-static int __init core_ctl_init(void)
+int core_ctl_init(void)
 {
 	struct sched_cluster *cluster;
 	int ret;
@@ -1375,5 +1375,3 @@ static int __init core_ctl_init(void)
 	initialized = true;
 	return 0;
 }
-
-late_initcall(core_ctl_init);
