@@ -23,6 +23,10 @@ gen_headers_out_arm = [
     "asm/unistd-oabi.h",
     "asm/unistd-eabi.h",
 
+    "linux/dn.h",
+    "sound/cs35l41_v2.h",
+    "linux/netfilter_decnet.h",
+    "linux/f2fs.h",
     // Matching generic-y:
 
     "asm/bitsperlong.h",

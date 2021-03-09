@@ -18,6 +18,10 @@ gen_headers_exclude_srcs_arm64 = [
 gen_headers_out_arm64 = [
 
     // Matching generic-y:
+    "linux/dn.h",
+    "sound/cs35l41_v2.h",
+    "linux/netfilter_decnet.h",
+    "linux/f2fs.h",
 
     "asm/errno.h",
     "asm/ioctl.h",
