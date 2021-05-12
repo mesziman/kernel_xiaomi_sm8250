@@ -62,6 +62,9 @@ gen_headers_out_arm = [
     "linux/msm_audio_wma.h",
     "linux/msm_audio_wmapro.h",
     "linux/wcd-spi-ac-params.h",
+
+      "sound/cs35l41.h", 
+ "sound/msm-cirrus-playback.h",              
 "sound/audio_effects.h",
     "sound/audio_slimslave.h",
     "sound/devdep_params.h",
@@ -142,6 +145,7 @@ gen_headers_out_arm = [
     "linux/affs_hardblocks.h",
     "linux/agpgart.h",
     "linux/aio_abi.h",
+    "linux/akm09970.h",
     "linux/am437x-vpfe.h",
     "linux/apm_bios.h",
     "linux/arcfb.h",
@@ -229,6 +233,7 @@ gen_headers_out_arm = [
     "linux/dm-log-userspace.h",
     "linux/dma-buf.h",
     "linux/dn.h",
+    "linux/drv8846.h",
     "linux/dqblk_xfs.h",
     "linux/edd.h",
     "linux/efs_fs_sb.h",
@@ -1001,8 +1006,8 @@ gen_headers_out_arm = [
     "asm/swab.h",
     "asm/types.h",
     "asm/unistd.h",
-
-    // From techpack/*/include/uapi/*/**/*.h
+    
+// From techpack/*/include/uapi/*/**/*.h
 
     "media/cam_cpas.h",
     "media/cam_custom.h",
@@ -1011,15 +1016,12 @@ gen_headers_out_arm = [
     "media/cam_icp.h",
     "media/cam_isp.h",
     "media/cam_isp_ife.h",
-    "media/cam_isp_tfe.h",
     "media/cam_isp_vfe.h",
     "media/cam_jpeg.h",
     "media/cam_lrme.h",
-    "media/cam_ope.h",
     "media/cam_req_mgr.h",
     "media/cam_sensor.h",
     "media/cam_sync.h",
-    "media/cam_tfe.h",
 ]
 
 genrule {
