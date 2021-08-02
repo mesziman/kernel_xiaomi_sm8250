@@ -19,16 +19,16 @@ steps:
       BOT_API_KEY:
         from_secret: bot_api_key
       TYPE: "REL-0.3.t"
-      DEVICE: alioth
+      DEVICE: apollo
       KBUILD_BUILD_USER: UtsavTheCunt
       KBUILD_BUILD_HOST: CuntsSpace
     commands:
       - apt-get update && apt-get install -y bison build-essential bc bison curl libssl-dev git zip python flex cpio
       - git clone https://github.com/UtsavBalar1231/Drone-scripts.git -b kona script && cd script
-      - ./setup-drone --alioth --proton
+      - ./setup-drone --apollo --proton
       - ./build-kernel --proton --lto
     when:
       branch:
-        - android11-stable
+        - test
       event:
         - push
