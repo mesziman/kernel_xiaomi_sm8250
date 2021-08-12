@@ -57,6 +57,7 @@
 #elif defined(USE_PLATFORM_BUS)
 #include <linux/platform_device.h>
 #endif
+#include <linux/cpu_boost.h>
 
 #define VER_MAJOR 1
 #define VER_MINOR 2
@@ -630,6 +631,7 @@ static irqreturn_t gf_irq(int irq, void *handle)
 
 	if ((gf_dev->wait_finger_down == true) &&
 	    (gf_dev->device_available == 1) && (gf_dev->fb_black == 1)) {
+    do_input_boost_max();
 		key_input = KEY_RIGHT;
 		input_report_key(gf_dev->input, key_input, 1);
 		input_sync(gf_dev->input);
