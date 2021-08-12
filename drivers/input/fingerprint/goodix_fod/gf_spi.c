@@ -50,6 +50,7 @@
 #elif defined(USE_PLATFORM_BUS)
 #include <linux/platform_device.h>
 #endif
+#include <linux/cpu_boost.h>
 
 #define VER_MAJOR   1
 #define VER_MINOR   2
@@ -548,6 +549,7 @@ static irqreturn_t gf_irq(int irq, void *handle)
 	__pm_wakeup_event(fp_wakelock, WAKELOCK_HOLD_TIME);
 	sendnlmsg(temp);
 
+        do_input_boost_max();
 #elif defined (GF_FASYNC)
 	struct gf_dev *gf_dev = &gf;
 
