@@ -16,8 +16,8 @@
 #include <linux/time.h>
 #include <linux/sysfs.h>
 #include <uapi/linux/sched/types.h>
-
 #include <linux/sched/rt.h>
+#include <linux/cpu_boost.h>
 
 #define cpu_boost_attr_rw(_name)		\
 static struct kobj_attribute _name##_attr =	\
@@ -156,7 +156,9 @@ static int boost_adjust_notify(struct notifier_block *nb, unsigned long val,
 		if (!ib_min)
 			break;
 
-		pr_debug("CPU%u policy min before boost: %u kHz\n",
+		ib_min = min((s->input_boost_min == UINT_MAX ?
+                              policy->max : s->input_boost_min), policy->max);
+                pr_debug("CPU%u policy min before boost: %u kHz\n",
 			 cpu, policy->min);
 		pr_debug("CPU%u boost min: %u kHz\n", cpu, ib_min);
 
@@ -210,6 +212,21 @@ static void do_input_boost_rem(struct work_struct *work)
 	}
 }
 
+void do_input_boost_max()
+{
+	unsigned int i;
+	struct cpu_sync *i_sync_info;
+
+	cancel_delayed_work_sync(&input_boost_rem);
+
+	for_each_possible_cpu(i) {
+		i_sync_info = &per_cpu(sync_info, i);
+		i_sync_info->input_boost_min = UINT_MAX;
+	}
+
+	update_policy_online();
+        schedule_delayed_work(&input_boost_rem, msecs_to_jiffies(!input_boost_ms ? 1500 : input_boost_ms));
+}
 static void do_input_boost(struct kthread_work *work)
 {
 	unsigned int i, ret;
