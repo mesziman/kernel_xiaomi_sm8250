@@ -182,8 +182,6 @@ static void a6xx_init(struct adreno_device *adreno_dev)
 			adreno_dev->highest_bank_bit = hbb;
 	}
 
-	a6xx_crashdump_init(adreno_dev);
-
 	/*
 	 * If the GMU is not enabled, rewrite the offset for the always on
 	 * counters to point to the CP always on instead of GMU always on
@@ -1504,7 +1502,7 @@ static struct adreno_irq a6xx_irq = {
 	.funcs = a6xx_irq_funcs,
 	.mask = A6XX_INT_MASK,
 };
-
+#if 0
 static struct adreno_coresight_register a6xx_coresight_regs[] = {
 	{ A6XX_DBGC_CFG_DBGBUS_SEL_A },
 	{ A6XX_DBGC_CFG_DBGBUS_SEL_B },
@@ -1918,7 +1916,7 @@ static struct adreno_coresight a6xx_coresight_cx = {
 	.count = ARRAY_SIZE(a6xx_coresight_regs_cx),
 	.groups = a6xx_coresight_groups_cx,
 };
-
+#endif
 static struct adreno_perfcount_register a6xx_perfcounters_cp[] = {
 	{ KGSL_PERFCOUNTER_NOT_USED, 0, 0, A6XX_RBBM_PERFCTR_CP_0_LO,
 		A6XX_RBBM_PERFCTR_CP_0_HI, 0, A6XX_CP_PERFCTR_CP_SEL_0 },
@@ -2732,9 +2730,7 @@ static void a6xx_clk_set_options(struct adreno_device *adreno_dev,
 struct adreno_gpudev adreno_a6xx_gpudev = {
 	.reg_offsets = &a6xx_reg_offsets,
 	.start = a6xx_start,
-	.snapshot = a6xx_snapshot,
 	.irq = &a6xx_irq,
-	.irq_trace = trace_kgsl_a5xx_irq_status,
 	.num_prio_levels = KGSL_PRIORITY_MAX_RB_LEVELS,
 	.cp_rb_cntl = A6XX_CP_RB_CNTL_DEFAULT,
 	.platform_setup = a6xx_platform_setup,
@@ -2765,6 +2761,5 @@ struct adreno_gpudev adreno_a6xx_gpudev = {
 	.sptprac_is_on = a6xx_sptprac_is_on,
 	.ccu_invalidate = a6xx_ccu_invalidate,
 	.perfcounter_update = a6xx_perfcounter_update,
-	.coresight = {&a6xx_coresight, &a6xx_coresight_cx},
 	.clk_set_options = a6xx_clk_set_options,
 };

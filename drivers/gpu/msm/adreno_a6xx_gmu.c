@@ -13,7 +13,6 @@
 
 #include "adreno.h"
 #include "adreno_a6xx.h"
-#include "adreno_snapshot.h"
 #include "kgsl_gmu.h"
 #include "kgsl_trace.h"
 
@@ -1454,7 +1453,7 @@ static unsigned int a6xx_gmu_ifpc_show(struct kgsl_device *device)
 
 	return gmu->idle_level >= GPU_HW_IFPC;
 }
-
+#if 0
 struct gmu_mem_type_desc {
 	struct gmu_memdesc *memdesc;
 	uint32_t type;
@@ -1490,13 +1489,13 @@ static size_t a6xx_snapshot_gmu_mem(struct kgsl_device *device,
 
 	return desc->memdesc->size + sizeof(*mem_hdr);
 }
-
+#endif
 struct a6xx_tcm_data {
 	enum gmu_mem_type type;
 	u32 start;
 	u32 last;
 };
-
+#if 0
 static size_t a6xx_snapshot_gmu_tcm(struct kgsl_device *device,
 		u8 *buf, size_t remain, void *priv)
 {
@@ -1524,7 +1523,6 @@ static size_t a6xx_snapshot_gmu_tcm(struct kgsl_device *device,
 
 	return bytes + sizeof(*mem_hdr);
 }
-
 static void a6xx_gmu_snapshot_memories(struct kgsl_device *device,
 		struct kgsl_snapshot *snapshot)
 {
@@ -1578,7 +1576,6 @@ static void a6xx_gmu_snapshot_memories(struct kgsl_device *device,
 		}
 	}
 }
-
 struct kgsl_snapshot_gmu_version {
 	uint32_t type;
 	uint32_t value;
@@ -1670,7 +1667,7 @@ static void a6xx_gmu_snapshot(struct kgsl_device *device,
 				ARRAY_SIZE(a6xx_gmu_gx_registers) / 2);
 	}
 }
-
+#endif
 static void a6xx_gmu_cooperative_reset(struct kgsl_device *device)
 {
 
@@ -1770,7 +1767,6 @@ struct gmu_dev_ops adreno_a6xx_gmudev = {
 	.wait_for_gmu_idle = a6xx_gmu_wait_for_idle,
 	.ifpc_store = a6xx_gmu_ifpc_store,
 	.ifpc_show = a6xx_gmu_ifpc_show,
-	.snapshot = a6xx_gmu_snapshot,
 	.cooperative_reset = a6xx_gmu_cooperative_reset,
 	.wait_for_active_transition = a6xx_gmu_wait_for_active_transition,
 	.read_ao_counter = a6xx_gmu_read_ao_counter,
