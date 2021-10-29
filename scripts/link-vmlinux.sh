@@ -137,7 +137,9 @@ vmlinux_link()
 {
 	local lds="${objtree}/${KBUILD_LDS}"
 	local objects
-
+	echo "==========================LD=========================="
+        echo $(which ${LD})
+	echo "==========================LD=========================="
 	if [ "${SRCARCH}" != "um" ]; then
 		if [ -z "${CONFIG_LTO_CLANG}" ]; then
 			objects="--whole-archive		\
@@ -178,7 +180,6 @@ kallsyms()
 {
 	info KSYM ${2}
 	local kallsymopt;
-
 	if [ -n "${CONFIG_KALLSYMS_ALL}" ]; then
 		kallsymopt="${kallsymopt} --all-symbols"
 	fi
