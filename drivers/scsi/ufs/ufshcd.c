@@ -8609,7 +8609,7 @@ static int ufs_get_device_desc(struct ufs_hba *hba,
 {
 	int err;
 	size_t buff_len;
-	u8 model_index, lun;
+	u8 model_index;
 #ifdef CONFIG_MACH_XIAOMI_SM8250
 	u8 *desc_buf;
 #else

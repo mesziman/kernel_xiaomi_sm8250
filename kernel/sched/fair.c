@@ -5489,7 +5489,6 @@ enqueue_task_fair(struct rq *rq, struct task_struct *p, int flags)
 	struct sched_entity *se = &p->se;
 	bool prefer_idle = sched_feat(EAS_PREFER_IDLE) ?
 				(schedtune_prefer_idle(p) > 0) : 0;
-        int task_new = !(flags & ENQUEUE_WAKEUP);
         int idle_h_nr_running = idle_policy(p->policy);
 
 	/*
