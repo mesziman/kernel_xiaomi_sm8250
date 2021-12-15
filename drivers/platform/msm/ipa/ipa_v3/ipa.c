@@ -5347,7 +5347,7 @@ void ipa3_dec_client_disable_clks_no_block(
 	queue_delayed_work(ipa3_ctx->power_mgmt_wq,
 		&ipa_dec_clients_disable_clks_on_wq_work, 0);
 }
-
+#ifdef IPA_WAKELOCKS
 /**
  * ipa3_inc_acquire_wakelock() - Increase active clients counter, and
  * acquire wakelock if necessary
@@ -5367,7 +5367,7 @@ void ipa3_inc_acquire_wakelock(void)
 		ipa3_ctx->wakelock_ref_cnt.cnt);
 	spin_unlock_irqrestore(&ipa3_ctx->wakelock_ref_cnt.spinlock, flags);
 }
-
+#endif
 /**
  * ipa3_dec_release_wakelock() - Decrease active clients counter
  *
