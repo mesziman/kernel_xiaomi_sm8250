@@ -32,7 +32,9 @@ static __always_inline void atomic_##op(int i, atomic_t *v)			\
 	register int w0 asm ("w0") = i;					\
 	register atomic_t *x1 asm ("x1") = v;				\
 									\
-	asm volatile(ARM64_LSE_ATOMIC_INSN(				\
+	asm volatile(                                                   \
+	__LSE_PREAMBLE                                                  \
+	ARM64_LSE_ATOMIC_INSN(				                \
 	/* LL/SC */							\
 	__LL_SC_ATOMIC(op)						\
 	__nops(1),							\
@@ -256,7 +258,9 @@ static __always_inline void atomic64_##op(long i, atomic64_t *v)			\
 	register long x0 asm ("x0") = i;				\
 	register atomic64_t *x1 asm ("x1") = v;				\
 									\
-	asm volatile(ARM64_LSE_ATOMIC_INSN(				\
+	asm volatile(                                                   \
+	__LSE_PREAMBLE                                                  \
+	ARM64_LSE_ATOMIC_INSN(				                \
 	/* LL/SC */							\
 	__LL_SC_ATOMIC64(op)						\
 	__nops(1),							\
