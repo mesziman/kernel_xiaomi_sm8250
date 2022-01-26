@@ -772,7 +772,9 @@ KBUILD_CFLAGS += $(call cc-disable-warning, tautological-compare)
 # CLANG uses a _MergedGlobals as optimization, but this breaks modpost, as the
 # source of a reference will be _MergedGlobals and not on of the whitelisted names.
 # See modpost pattern 2
+ifdef CONFIG_MODULES
 KBUILD_CFLAGS += $(call cc-option, -mno-global-merge,)
+endif
 KBUILD_CFLAGS += $(call cc-option, -fcatch-undefined-behavior)
 endif
 
