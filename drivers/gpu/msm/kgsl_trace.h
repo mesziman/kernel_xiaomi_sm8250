@@ -3,6 +3,8 @@
  * Copyright (c) 2011-2021, The Linux Foundation. All rights reserved.
  */
 
+#define trace_kgsl_aux_command(...) {}
+#define trace_kgsl_drawobj_timeline() {}
 #define trace_kgsl_a3xx_irq_status(...) {}
 #define trace_kgsl_a4xx_irq_status(...) {} 
 #define trace_kgsl_a5xx_irq_status(...) {}

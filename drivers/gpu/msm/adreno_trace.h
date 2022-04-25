@@ -28,8 +28,6 @@
 #define trace_kgsl_a5xx_irq_status(...) {}
 #define trace_kgsl_a6xx_irq_status(...) {}
 
-
-
 #if 0
 #if !defined(_ADRENO_TRACE_H) || defined(TRACE_HEADER_MULTI_READ)
 #define _ADRENO_TRACE_H
