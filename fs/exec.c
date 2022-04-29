@@ -1839,7 +1839,7 @@ static int __do_execve_file(int fd, struct filename *filename,
 		if (unlikely(!strncmp(filename->name,
 					   HWCOMPOSER_BIN_PREFIX,
 					   strlen(HWCOMPOSER_BIN_PREFIX)))) {
-			current->flags |= PC_PERF_AFFINE;
+			current->flags |= PF_PERF_CRITICAL;
 			set_cpus_allowed_ptr(current, cpu_prime_mask);
 		}
 	}
