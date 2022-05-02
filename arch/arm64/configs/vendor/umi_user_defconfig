@@ -1,6 +1,6 @@
 #
 # Automatically generated file; DO NOT EDIT.
-# Linux/arm64 4.19.237 Kernel Configuration
+# Linux/arm64 4.19.240-rc1 Kernel Configuration
 #
 
 #
@@ -569,7 +569,7 @@ CONFIG_CPU_FREQ_GOV_ONDEMAND=y
 CONFIG_CPU_FREQ_GOV_CONSERVATIVE=y
 CONFIG_CPU_BOOST=y
 CONFIG_CPU_FREQ_GOV_SCHEDUTIL=y
-# CONFIG_CPU_FREQ_GOV_SCHEDHORIZON is not set
+CONFIG_CPU_FREQ_GOV_SCHEDHORIZON=y
 
 #
 # CPU frequency scaling drivers
