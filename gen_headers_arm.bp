@@ -18,7 +18,7 @@ gen_headers_exclude_srcs_arm = [
 gen_headers_out_arm = [
 
     // Matching generated-y:
-
+    "linux/f2fs.h",
     "asm/unistd-common.h",
     "asm/unistd-oabi.h",
     "asm/unistd-eabi.h",

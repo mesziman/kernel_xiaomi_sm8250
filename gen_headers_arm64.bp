@@ -18,7 +18,7 @@ gen_headers_exclude_srcs_arm64 = [
 gen_headers_out_arm64 = [
 
     // Matching generic-y:
-
+    "linux/f2fs.h",
     "asm/errno.h",
     "asm/ioctl.h",
     "asm/ioctls.h",
