@@ -344,21 +344,6 @@ void blk_recalc_rq_segments(struct request *rq)
 	rq->nr_phys_segments = __blk_recalc_rq_segments(rq->q, rq->bio);
 }
 
-<<<<<<< HEAD
-void blk_recount_segments(struct request_queue *q, struct bio *bio)
-{
-	struct bio *nxt = bio->bi_next;
-
-	bio->bi_next = NULL;
-	bio->bi_phys_segments = __blk_recalc_rq_segments(q, bio);
-	bio->bi_next = nxt;
-
-	bio_set_flag(bio, BIO_SEG_VALID);
-}
-EXPORT_SYMBOL(blk_recount_segments);
-
-=======
->>>>>>> 14ccb66b3f585... block: remove the bi_phys_segments field in struct bio
 static inline struct scatterlist *blk_next_sg(struct scatterlist **sg,
 		struct scatterlist *sglist)
 {
