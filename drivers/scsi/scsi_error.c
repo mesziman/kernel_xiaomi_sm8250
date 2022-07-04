@@ -308,8 +308,7 @@ enum blk_eh_timer_return scsi_times_out(struct request *req)
 		 * error handler. In that case we can return immediately as no
 		 * further action is required.
 		 */
-		if (!blk_mq_mark_complete(req))
-			return rtn;
+		WRITE_ONCE(rq->state, MQ_RQ_COMPLETE);
 		if (scsi_abort_command(scmd) != SUCCESS) {
 			set_host_byte(scmd, DID_TIME_OUT);
 			scsi_eh_scmd_add(scmd);
