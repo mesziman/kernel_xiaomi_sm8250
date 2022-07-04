@@ -722,16 +722,6 @@ enum elv_merge blk_try_req_merge(struct request *req, struct request *next)
 	return ELEVATOR_NO_MERGE;
 }
 
-enum elv_merge blk_try_req_merge(struct request *req, struct request *next)
-{
-	if (blk_discard_mergable(req))
-		return ELEVATOR_DISCARD_MERGE;
-	else if (blk_rq_pos(req) + blk_rq_sectors(req) == blk_rq_pos(next))
-		return ELEVATOR_BACK_MERGE;
-
-	return ELEVATOR_NO_MERGE;
-}
-
 /*
  * For non-mq, this has to be called with the request spinlock acquired.
  * For mq with scheduling, the appropriate queue wide lock should be held.
