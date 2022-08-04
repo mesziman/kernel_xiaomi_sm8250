@@ -444,7 +444,7 @@ static struct request *ssg_dispatch_request(struct blk_mq_hw_ctx *hctx)
 	return rq;
 }
 
-static void ssg_completed_request(struct request *rq, u64 now)
+static void ssg_completed_request(struct request *rq)
 {
 	struct ssg_data *ssg = rq->q->elevator->elevator_data;
 	struct ssg_request_info *rqi;
@@ -651,9 +651,9 @@ static int ssg_request_merge(struct request_queue *q, struct request **rq,
 	return ELEVATOR_NO_MERGE;
 }
 
-static bool ssg_bio_merge(struct request_queue *q, struct bio *bio,
-		unsigned int nr_segs)
+static bool ssg_bio_merge(struct blk_mq_hw_ctx *hctx, struct bio *bio)
 {
+	struct request_queue *q = hctx->queue;
 	struct ssg_data *ssg = q->elevator->elevator_data;
 	struct request *free = NULL;
 	bool ret;
@@ -751,8 +751,6 @@ static void ssg_prepare_request(struct request *rq, struct bio *bio)
 	            blkcg = css_to_blkcg(css);
 		else
 		    blkcg = css_to_blkcg(task_css(current, io_cgrp_id));
-		if (!blkcg)
-			goto out;
 		rqi->blkg = blkg_lookup(blkcg, rq->q);
 		ssg_blkcg_inc_rq(rqi->blkg);
 out:
@@ -789,7 +787,7 @@ static void ssg_finish_request(struct request *rq)
 		spin_lock_irqsave(&ssg->zone_lock, flags);
 		blk_req_zone_write_unlock(rq);
 		if (!list_empty(&ssg->fifo_list[WRITE]))
-			blk_mq_sched_mark_restart_hctx(rq->mq_hctx);
+			blk_mq_sched_mark_restart_hctx(blk_mq_map_queue(rq->q, rq->mq_ctx->cpu));//rq->mq_hctx);
 		spin_unlock_irqrestore(&ssg->zone_lock, flags);
 	}
 

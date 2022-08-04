@@ -75,12 +75,12 @@ static void ssg_blkcg_set_shallow_depth(struct ssg_blkcg *ssg_blkcg,
 		max_t(unsigned int, 1, ssg_blkg->max_available_rqs / map_nr);
 }
 
-static struct blkg_policy_data *ssg_blkcg_pd_alloc(gfp_t gfp,
-		struct request_queue *q, struct blkcg *blkcg)
+static struct blkg_policy_data *ssg_blkcg_pd_alloc(gfp_t gfp,int node)
+//		struct request_queue *q, struct blkcg *blkcg)
 {
 	struct ssg_blkg *ssg_blkg;
 
-	ssg_blkg = kzalloc_node(sizeof(struct ssg_blkg), gfp, q->node);
+	ssg_blkg = kzalloc_node(sizeof(struct ssg_blkg), gfp, node);
 	if (ZERO_OR_NULL_PTR(ssg_blkg))
 		return NULL;
 
@@ -119,10 +119,18 @@ unsigned int ssg_blkcg_shallow_depth(struct request_queue *q)
 {
 	struct blkcg_gq *blkg;
 	struct ssg_blkg *ssg_blkg;
+	struct cgroup_subsys_state *css;
+	struct blkcg *blkcg;
 
 	rcu_read_lock();
-	blkg = blkg_lookup(css_to_blkcg(blkcg_css()), q);
+	css = kthread_blkcg();
+	if (css)
+		blkcg = css_to_blkcg(css);
+	else
+		blkcg = css_to_blkcg(task_css(current, io_cgrp_id));
+	blkg = blkg_lookup(blkcg, q); //css_to_blkcg(blkcg_css()), q);
 	ssg_blkg = BLKG_TO_SSG_BLKG(blkg);
+out:
 	rcu_read_unlock();
 
 	if (IS_ERR_OR_NULL(ssg_blkg))
