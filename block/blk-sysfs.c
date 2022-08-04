@@ -854,8 +854,6 @@ static void __blk_release_queue(struct work_struct *work)
 
 	blk_queue_free_zone_bitmaps(q);
 
-	blk_queue_free_zone_bitmaps(q);
-
 	if (!q->mq_ops) {
 		if (q->exit_rq_fn)
 			q->exit_rq_fn(q, q->fq->flush_rq);
