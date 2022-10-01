@@ -95,11 +95,6 @@ source "net/mptcp/Kconfig"
 
 endif # if INET
 
-config ANDROID_PARANOID_NETWORK
-	bool "Only allow certain groups to create sockets"
-	help
-		none
-
 config NETWORK_SECMARK
 	bool "Security Marking"
 	help
