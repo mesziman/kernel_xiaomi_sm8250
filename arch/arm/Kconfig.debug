@@ -58,7 +58,10 @@ config FRAME_POINTER
 	  faster. However, if neither FRAME_POINTER nor ARM_UNWIND are enabled,
 	  when a problem occurs with the kernel, the information that is
 	  reported is severely limited.
-
+config ARM_UNWIND
+       bool "Enable stack unwinding support (EXPERIMENTAL)"
+       depends on AEABI
+       default y
 config UNWINDER_ARM
 	bool "ARM EABI stack unwinder"
 	depends on AEABI && !FUNCTION_GRAPH_TRACER
