@@ -1939,7 +1939,7 @@ retry:
 		}
 
 		for_each_cpu_and(cpu, lowest_mask, sched_group_span(sg)) {
-
+			bool lt;
 			trace_sched_cpu_util(cpu);
 
 			if (cpu_isolated(cpu))
