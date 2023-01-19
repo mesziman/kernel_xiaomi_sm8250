@@ -192,6 +192,11 @@ extern void tlb_remove_table(struct mmu_gather *tlb, void *table);
  */
 #ifndef tlb_needs_table_invalidate
 #define tlb_needs_table_invalidate() (true)
+void tlb_remove_table_sync_one(void);
+
+#else
+
+static inline void tlb_remove_table_sync_one(void) { }
 #endif
 
 #else
