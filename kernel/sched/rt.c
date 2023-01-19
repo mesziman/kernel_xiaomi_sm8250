@@ -1716,7 +1716,7 @@ static void try_pull_rt_task(struct rq *this_rq)
 	if (!p)
 		goto unlock;
 
-	if (sched_ktime_clock() - p->wts.last_wake_ts <
+	if (sched_ktime_clock() - p->last_wake_ts <
 				WALT_RT_PULL_THRESHOLD_NS)
 		goto unlock;
 
