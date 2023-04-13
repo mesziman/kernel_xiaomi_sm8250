@@ -181,7 +181,7 @@ do_gc:
 
 			if (should_break_gc(sbi))
 				break;
-
+    }
 		if (foreground)
 			wake_up_all(&gc_th->fggc_wq);
 

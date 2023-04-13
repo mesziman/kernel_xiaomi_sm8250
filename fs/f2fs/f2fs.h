@@ -3932,6 +3932,7 @@ struct f2fs_stat_info {
 	struct f2fs_sb_info *sbi;
 	int all_area_segs, sit_area_segs, nat_area_segs, ssa_area_segs;
 	int main_area_segs, main_area_sections, main_area_zones;
+  unsigned long long sync_file_total;
 	unsigned long long cp_reason_total[NR_CP_REASON_TYPE];
 	unsigned long long hit_cached[NR_EXTENT_CACHES];
 	unsigned long long hit_rbtree[NR_EXTENT_CACHES];
