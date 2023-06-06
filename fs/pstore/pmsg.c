@@ -19,7 +19,7 @@
 #include <linux/rtmutex.h>
 #include "internal.h"
 
-static DEFINE_RT_MUTEX(pmsg_lock);
+static DEFINE_MUTEX(pmsg_lock);
 
 #define LOGGER_MAGIC		'l'
 #define LOG_ID_EVENTS		2
