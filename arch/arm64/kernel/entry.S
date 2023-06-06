@@ -359,6 +359,10 @@ alternative_else_nop_endif
 	ldp	x24, x25, [sp, #16 * 12]
 	ldp	x26, x27, [sp, #16 * 13]
 	ldp	x28, x29, [sp, #16 * 14]
+	/*
+	 * ARCH_HAS_MEMBARRIER_SYNC_CORE rely on eret context synchronization
+	 * when returning from IPI handler, and when returning to user-space.
+	 */
 
 	.if	\el == 0
 alternative_if_not ARM64_UNMAP_KERNEL_AT_EL0
@@ -1086,7 +1090,7 @@ alternative_endif
 	sb
 	.endm
 
-	.macro	generate_tramp_vector,	kpti, bhb
+	.macro	generate_tramp_vector, kpti, bhb
 .Lvector_start\@:
 	.space	0x400
 
@@ -1161,11 +1165,10 @@ __entry_tramp_data_this_cpu_vector:
 	.rept	4
 	tramp_ventry	.Lvector_start\@, 64, 0, \bhb
 	.endr
-	.rept 4
+	.rept	4
 	tramp_ventry	.Lvector_start\@, 32, 0, \bhb
 	.endr
 	.endm
-
 /* The order must match tramp_vecs and the arm64_bp_harden_el1_vectors enum. */
 	.pushsection ".entry.text", "ax"
 	.align	11
@@ -1270,7 +1273,7 @@ ENTRY(__sdei_asm_entry_trampoline)
 	 */
 1:	str	x4, [x1, #(SDEI_EVENT_INTREGS + S_ORIG_ADDR_LIMIT)]
 
-	tramp_data_read_var     x4, __sdei_asm_handler
+	tramp_data_read_var	x4, __sdei_asm_handler
 	br	x4
 ENDPROC(__sdei_asm_entry_trampoline)
 NOKPROBE(__sdei_asm_entry_trampoline)
