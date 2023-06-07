@@ -16,7 +16,6 @@
 #include <linux/fs.h>
 #include <linux/uaccess.h>
 #include <linux/uio.h>
-#include <linux/rtmutex.h>
 #include "internal.h"
 
 static DEFINE_MUTEX(pmsg_lock);
@@ -74,9 +73,9 @@ static ssize_t pmsg_write(char *buf, size_t count)
 	record.size = count;
 	record.buf = buf;
 
-	rt_mutex_lock(&pmsg_lock);
+	mutex_lock(&pmsg_lock);
 	ret = psinfo->write(&record);
-	rt_mutex_unlock(&pmsg_lock);
+	mutex_unlock(&pmsg_lock);
 	return ret ? ret : count;
 }
 
