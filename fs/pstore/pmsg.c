@@ -88,9 +88,9 @@ static ssize_t pmsg_write_user(const char __user *buf, size_t count)
 	record.type = PSTORE_TYPE_PMSG;
 	record.size = count;
 
-	rt_mutex_lock(&pmsg_lock);
+	mutex_lock(&pmsg_lock);
 	ret = psinfo->write_user(&record, buf);
-	rt_mutex_unlock(&pmsg_lock);
+	mutex_unlock(&pmsg_lock);
 	return ret ? ret : count;
 }
 
