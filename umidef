@@ -607,7 +607,17 @@ CONFIG_CRYPTO_POLY1305_NEON=y
 # General architecture-dependent options
 #
 <<<<<<< HEAD
+<<<<<<< HEAD
 # CONFIG_KPROBES is not set
+=======
+<<<<<<< HEAD:umidef
+=======
+CONFIG_KPROBES=y
+CONFIG_HAVE_KPROBES=y
+CONFIG_KPROBE_EVENTS=y
+CONFIG_MODULES=y
+>>>>>>> ec9c3ff81bce (implement kernelsu):arch/arm64/configs/umi_defconfig
+>>>>>>> 04e347ed743d (implement kernelsu)
 CONFIG_JUMP_LABEL=y
 # CONFIG_STATIC_KEYS_SELFTEST is not set
 CONFIG_UPROBES=y
