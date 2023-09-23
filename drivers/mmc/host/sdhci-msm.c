@@ -5659,6 +5659,7 @@ static int sdhci_msm_probe(struct platform_device *pdev)
 	if (msm_host->pwr_irq < 0) {
 		dev_err(&pdev->dev, "Failed to get pwr_irq by name (%d)\n",
 				msm_host->pwr_irq);
+  	ret = msm_host->pwr_irq;
 		goto vreg_deinit;
 	}
 	ret = devm_request_threaded_irq(&pdev->dev, msm_host->pwr_irq, NULL,
