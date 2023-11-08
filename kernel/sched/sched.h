@@ -145,6 +145,7 @@ struct sched_cluster {
 	unsigned int max_possible_freq;
 	bool freq_init_done;
 	u64 aggr_grp_load;
+ 	u16			util_to_cost[1024];
 };
 
 extern cpumask_t asym_cap_sibling_cpus;
