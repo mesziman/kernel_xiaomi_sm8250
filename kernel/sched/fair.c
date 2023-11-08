@@ -7776,6 +7776,16 @@ cpu_util_next_walt_prs(int cpu, struct task_struct *p, int dst_cpu, bool prev_ds
 	return util;
 }
 
+static inline unsigned long get_util_to_cost(int cpu, unsigned long util)
+{
+  struct sched_cluster *cluster = cpu_cluster(cpu);
+
+	if (cpu == 0 && util > 220)
+		return mult_frac(cluster->util_to_cost[util], 300, 100);
+	else
+		return cluster->util_to_cost[util];
+}
+
 /**
  * walt_em_cpu_energy() - Estimates the energy consumed by the CPUs of a
 		performance domain
@@ -7793,9 +7803,8 @@ cpu_util_next_walt_prs(int cpu, struct task_struct *p, int dst_cpu, bool prev_ds
 static inline unsigned long walt_em_cpu_energy(struct em_perf_domain *pd,
 				unsigned long max_util, unsigned long sum_util)
 {
-	unsigned long scale_cpu;
+	unsigned long scale_cpu, cost;
 	int cpu;
-  struct sched_cluster *cluster = cpu_cluster(cpu);
 
 	if (!sum_util)
 		return 0;
@@ -7855,8 +7864,8 @@ static inline unsigned long walt_em_cpu_energy(struct em_perf_domain *pd,
 	 */
 	if (max_util >= 1024)
 		max_util = 1023;
-
-	return cluster->util_to_cost[max_util] * sum_util / scale_cpu;
+  cost = get_util_to_cost(cpu, max_util);
+	return cost * sum_util / scale_cpu;
 }
 #endif
 
