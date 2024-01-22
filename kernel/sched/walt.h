@@ -570,6 +570,5 @@ static inline unsigned int walt_nr_rtg_high_prio(int cpu)
 	return 0;
 }
 #endif /* CONFIG_SCHED_WALT */
-extern __read_mostly unsigned int walt_scale_demand_divisor;
-#define scale_demand(d) ((d)/walt_scale_demand_divisor)
+
 #endif
