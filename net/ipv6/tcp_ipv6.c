@@ -259,7 +259,6 @@ int tcp_v6_connect(struct sock *sk, struct sockaddr *uaddr,
 			icsk->icsk_ext_hdr_len = exthdrlen;
 #ifdef CONFIG_MPTCP
 			if (sock_flag(sk, SOCK_MPTCP))
-				icsk->icsk_af_ops = &mptcp_v6_specific;
         WRITE_ONCE(icsk->icsk_af_ops, &mptcp_v6_specific);
 			else
 #endif
