@@ -4067,6 +4067,7 @@ struct find_best_target_env {
 	bool is_rtg;
 	bool boosted;
 	bool strict_max;
+	u64	prs[8];
 };
 
 static inline void adjust_cpus_for_packing(struct task_struct *p,
@@ -7752,46 +7753,27 @@ static unsigned long cpu_util_next(int cpu, struct task_struct *p, int dst_cpu)
 }
 
 #ifdef CONFIG_SCHED_WALT
-static inline unsigned long
-cpu_util_next_walt(int cpu, struct task_struct *p, int dst_cpu)
+static inline u64
+cpu_util_next_walt_prs(int cpu, struct task_struct *p, int dst_cpu, bool prev_dst_same_cluster,
+											u64 *prs)
 {
-	unsigned long util =
-			cpu_rq(cpu)->walt_stats.cumulative_runnable_avg_scaled;
-	bool queued = task_on_rq_queued(p);
+	long util = prs[cpu];
 
-	/*
-	 * When task is queued,
-	 * (a) The evaluating CPU (cpu) is task's current CPU. If the
-	 * task is migrating, discount the task contribution from the
-	 * evaluation cpu.
-	 * (b) The evaluating CPU (cpu) is task's current CPU. If the
-	 * task is NOT migrating, nothing to do. The contribution is
-	 * already present on the evaluation CPU.
-	 * (c) The evaluating CPU (cpu) is not task's current CPU. But
-	 * the task is migrating to the evaluating CPU. So add the
-	 * task contribution to it.
-	 * (d) The evaluating CPU (cpu) is neither the current CPU nor
-	 * the destination CPU. don't care.
-	 *
-	 * When task is NOT queued i.e waking. Task contribution is not
-	 * present on any CPU.
-	 *
-	 * (a) If the evaluating CPU is the destination CPU, add the task
-	 * contribution.
-	 * (b) The evaluation CPU is not the destination CPU, don't care.
-	 */
-	if (unlikely(queued)) {
-		if (task_cpu(p) == cpu) {
-			if (dst_cpu != cpu)
-				util = max_t(long, util - task_util(p), 0);
-		} else if (dst_cpu == cpu) {
-			util += task_util(p);
+	if (p->ravg.prev_window) {
+		if (!prev_dst_same_cluster) {
+			/* intercluster migration of non rtg task - mimic fixups */
+			util -= p->ravg.prev_window_cpu[cpu];
+			if (util < 0)
+				util = 0;
+			if (cpu == dst_cpu)
+				util += p->ravg.prev_window;
 		}
-	} else if (dst_cpu == cpu) {
-		util += task_util(p);
+	} else {
+		if (cpu == dst_cpu)
+			util += p->ravg.demand;
 	}
 
-	return min_t(unsigned long, util, capacity_orig_of(cpu));
+	return util;
 }
 #endif
 
@@ -7803,7 +7785,7 @@ cpu_util_next_walt(int cpu, struct task_struct *p, int dst_cpu)
  * task.
  */
 static long
-compute_energy(struct task_struct *p, int dst_cpu, struct perf_domain *pd, cpumask_t *candidates)
+compute_energy(struct task_struct *p, int dst_cpu, struct perf_domain *pd, cpumask_t *candidates, u64 *prs)
 {
 	unsigned int max_util, cpu_util, cpu_cap;
 	unsigned long sum_util, energy = 0;
@@ -7820,7 +7802,9 @@ compute_energy(struct task_struct *p, int dst_cpu, struct perf_domain *pd, cpuma
        */
       cpu_cap = arch_scale_cpu_capacity(NULL, cpumask_first(pd_mask));
       max_util = sum_util = 0;
-
+      bool prev_dst_same_cluster = false;
+	    if (same_cluster(task_cpu(p), dst_cpu))
+    	    prev_dst_same_cluster = true;
       /*
        * The capacity state of CPUs of the current rd can be driven by
        * CPUs of another rd if they belong to the same performance
@@ -7833,7 +7817,7 @@ compute_energy(struct task_struct *p, int dst_cpu, struct perf_domain *pd, cpuma
        */
       for_each_cpu_and(cpu, pd_mask, cpu_online_mask) {
 #ifdef CONFIG_SCHED_WALT
-        cpu_util = cpu_util_next_walt(cpu, p, dst_cpu);
+        cpu_util = cpu_util_next_walt_prs(cpu, p, dst_cpu, prev_dst_same_cluster, prs);
         sum_util += cpu_util;
 #else
         unsigned int util_cfs;
@@ -7863,6 +7847,8 @@ compute_energy(struct task_struct *p, int dst_cpu, struct perf_domain *pd, cpuma
 #endif
         max_util = max(max_util, cpu_util);
       }
+     	max_util = scale_demand(max_util);
+     	sum_util = scale_demand(sum_util);
       energy += em_pd_energy(pd->em_pd, max_util, sum_util);
 	  }
   }
@@ -8169,7 +8155,7 @@ static int find_energy_efficient_cpu(struct task_struct *p, int prev_cpu,
 	}
 
 	if (cpumask_test_cpu(prev_cpu, &p->cpus_allowed))
-		prev_energy = best_energy = compute_energy(p, prev_cpu, pd, candidates);
+		prev_energy = best_energy = compute_energy(p, prev_cpu, pd, candidates, fbt_env.prs);
 	else
 		prev_energy = best_energy = ULONG_MAX;
 
@@ -8177,7 +8163,7 @@ static int find_energy_efficient_cpu(struct task_struct *p, int prev_cpu,
 	for_each_cpu(cpu, candidates) {
 		if (cpu == prev_cpu)
 			continue;
-		cur_energy = compute_energy(p, cpu, pd, candidates);
+		cur_energy = compute_energy(p, cpu, pd, candidates, fbt_env.prs);
 		trace_sched_compute_energy(p, cpu, cur_energy, prev_energy,
 					   best_energy, best_energy_cpu);
 		if (cur_energy < best_energy) {

@@ -200,7 +200,6 @@ static int __init set_sched_predl(char *str)
 early_param("sched_predl", set_sched_predl);
 
 __read_mostly unsigned int walt_scale_demand_divisor;
-#define scale_demand(d) ((d)/walt_scale_demand_divisor)
 
 void inc_rq_walt_stats(struct rq *rq, struct task_struct *p)
 {
