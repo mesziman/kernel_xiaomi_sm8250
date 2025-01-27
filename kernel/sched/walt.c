@@ -2555,6 +2555,7 @@ void update_cluster_topology(void)
 
 	if (cpumask_weight(&asym_cap_sibling_cpus) == 1)
 		cpumask_clear(&asym_cap_sibling_cpus);
+ 	create_util_to_cost();
 }
 
 static unsigned long cpu_max_table_freq[NR_CPUS];
@@ -3802,6 +3803,46 @@ void sched_set_refresh_rate(enum fps fps)
 	}
 }
 EXPORT_SYMBOL(sched_set_refresh_rate);
+
+
+static void create_util_to_cost_pd(struct em_perf_domain *pd)
+{
+	int util, cpu = cpumask_first(to_cpumask(pd->cpus));
+	unsigned long fmax;
+	unsigned long scale_cpu;
+	struct sched_cluster *cluster = cpu_cluster(cpu);
+
+	fmax = (u64)pd->table[pd->nr_cap_states - 1].frequency;
+	scale_cpu = arch_scale_cpu_capacity(NULL, cpu);
+
+	for (util = 0; util < 1024; util++) {
+		int j;
+
+		int f = (fmax * util) / scale_cpu;
+		struct em_cap_state *ps = &pd->table[0];
+
+		for (j = 0; j < pd->nr_cap_states; j++) {
+			ps = &pd->table[j];
+			if (ps->frequency >= f)
+				break;
+		}
+		cluster->util_to_cost[util] = ps->cost;
+	}
+}
+
+void create_util_to_cost(void)
+{
+	struct perf_domain *pd;
+	struct root_domain *rd = cpu_rq(smp_processor_id())->rd;
+
+	rcu_read_lock();
+	pd = rcu_dereference(rd->pd);
+	for (; pd; pd = pd->next)
+		create_util_to_cost_pd(pd->em_pd);
+	rcu_read_unlock();
+}
+
+DECLARE_PER_CPU(unsigned long, gov_last_util);
 
 /* Migration margins */
 unsigned int sysctl_sched_capacity_margin_up[MAX_MARGIN_LEVELS] = {
