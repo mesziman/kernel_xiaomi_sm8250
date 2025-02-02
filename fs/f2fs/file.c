@@ -2338,6 +2338,7 @@ static int f2fs_ioc_shutdown(struct file *filp, unsigned long arg)
 			if (ret == -EIO)
 				ret = 0;
 			goto out;
+    }
 		f2fs_stop_checkpoint(sbi, false, STOP_CP_REASON_SHUTDOWN);
 		set_sbi_flag(sbi, SBI_IS_SHUTDOWN);
 		break;
