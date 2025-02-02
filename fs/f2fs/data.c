@@ -1484,7 +1484,8 @@ alloc:
 	if (err)
 		return err;
 
-	if (GET_SEGNO(sbi, old_blkaddr) != NULL_SEGNO)
+	if (GET_SEGNO(sbi, old_blkaddr) != NULL_SEGNO) {
+
 		invalidate_mapping_pages(META_MAPPING(sbi),
 					old_blkaddr, old_blkaddr);
 		f2fs_invalidate_compress_page(sbi, old_blkaddr);
