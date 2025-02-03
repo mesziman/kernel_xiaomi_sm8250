@@ -62,6 +62,7 @@
 #include <linux/extcon-provider.h>
 #include <linux/devfreq.h>
 #include <linux/pm_qos.h>
+#include <linux/irq_work.h>
 #include "unipro.h"
 
 #include <asm/irq.h>
@@ -1185,6 +1186,8 @@ struct ufs_hba {
 		struct pm_qos_request req;
 		struct work_struct get_work;
 		struct work_struct put_work;
+ 		struct irq_work get_irq_work;
+		struct irq_work put_irq_work;
 		struct mutex lock;
 		atomic_t count;
 		bool active;
@@ -1669,13 +1672,13 @@ static inline void ufshcd_vops_remove_debugfs(struct ufs_hba *hba)
 static inline void ufshcd_pm_qos_get(struct ufs_hba *hba)
 {
 	if (atomic_inc_return(&hba->pm_qos.count) == 1)
-		queue_work(system_unbound_wq, &hba->pm_qos.get_work);
+		irq_work_queue(&hba->pm_qos.get_irq_work);
 }
 
 static inline void ufshcd_pm_qos_put(struct ufs_hba *hba)
 {
 	if (atomic_dec_return(&hba->pm_qos.count) == 0)
-		queue_work(system_unbound_wq, &hba->pm_qos.put_work);
+		irq_work_queue(&hba->pm_qos.put_irq_work);
 }
 
 
