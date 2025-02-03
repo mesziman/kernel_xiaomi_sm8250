@@ -3876,18 +3876,6 @@ static void ufshcd_pm_qos_put_worker(struct work_struct *work)
 	mutex_unlock(&hba->pm_qos.lock);
 }
 
-static void ufshcd_pm_qos_get(struct ufs_hba *hba)
-{
-	if (atomic_inc_return(&hba->pm_qos.count) == 1)
-		queue_work(system_unbound_wq, &hba->pm_qos.get_work);
-}
-
-static void ufshcd_pm_qos_put(struct ufs_hba *hba)
-{
-	if (atomic_dec_return(&hba->pm_qos.count) == 0)
-		queue_work(system_unbound_wq, &hba->pm_qos.put_work);
-}
-
 /**
  * ufshcd_queuecommand - main entry point for SCSI requests
  * @host: SCSI host pointer
@@ -4146,7 +4134,7 @@ out:
 		add_lrbp->cmd = NULL;
 		clear_bit_unlock(add_tag, &hba->lrb_in_use);
 		ufshcd_release_all(hba);
-		ufshcd_vops_pm_qos_req_end(hba, pre_cmd->request, true);
+    ufshcd_pm_qos_put(hba);
 		ufshcd_complete_lrbp_crypto(hba, pre_cmd, add_lrbp);
 		ufsf_hpb_end_pre_req(&hba->ufsf, pre_cmd->request);
 	}
