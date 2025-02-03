@@ -3432,7 +3432,7 @@ reallocate:
 		goto out;
 	}
 
-	if (GET_SEGNO(fio->sbi, fio->old_blkaddr) != NULL_SEGNO)
+	if (GET_SEGNO(fio->sbi, fio->old_blkaddr) != NULL_SEGNO) {
 		invalidate_mapping_pages(META_MAPPING(fio->sbi),
 					fio->old_blkaddr, fio->old_blkaddr);
 		f2fs_invalidate_compress_page(fio->sbi, fio->old_blkaddr);
