@@ -551,7 +551,6 @@ static int sendcmd(struct adreno_device *adreno_dev,
 	struct kgsl_drawobj *drawobj = DRAWOBJ(cmdobj);
 	struct adreno_gpudev *gpudev = ADRENO_GPU_DEVICE(adreno_dev);
 	struct adreno_dispatcher *dispatcher = &adreno_dev->dispatcher;
-	struct adreno_context *drawctxt = ADRENO_CONTEXT(drawobj->context);
 	struct adreno_dispatcher_drawqueue *dispatch_q =
 				ADRENO_DRAWOBJ_DISPATCH_DRAWQUEUE(drawobj);
 	struct adreno_submit_time time;
@@ -2381,7 +2380,6 @@ static void cmdobj_profile_ticks(struct adreno_device *adreno_dev,
 static void retire_cmdobj(struct adreno_device *adreno_dev,
 		struct kgsl_drawobj_cmd *cmdobj)
 {
-	struct adreno_dispatcher *dispatcher = &adreno_dev->dispatcher;
 	struct kgsl_drawobj *drawobj = DRAWOBJ(cmdobj);
 	struct adreno_context *drawctxt = ADRENO_CONTEXT(drawobj->context);
 	uint64_t start = 0, end = 0;
