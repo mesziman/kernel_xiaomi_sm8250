@@ -132,9 +132,9 @@ int mb_cache_entry_create(struct mb_cache *cache, gfp_t mask, u32 key,
 		.e_refcnt = ATOMIC_INIT(2),
 		.e_key = key,
 		.e_value = value,
-		.e_reusable = reusable
 	};
-
+  if (reusable)
+      set_bit(MBE_REUSABLE_B, &entry->e_flags);
 	hlist_bl_lock(head);
 	list_del(&req.lnode);
 	hlist_bl_add_head(&entry->e_hash_list, head);
