@@ -82,11 +82,10 @@ int __fsverity_verify_signature(const struct inode *inode, const u8 *signature,
 	memcpy(d->magic, "FSVerity", 8);
 	d->digest_algorithm = cpu_to_le16(hash_alg - fsverity_hash_algs);
 	d->digest_size = cpu_to_le16(hash_alg->digest_size);
-	memcpy(d->digest, file_digest, hash_alg->digest_size);
+	memcpy(d->digest, vi->file_digest, hash_alg->digest_size);
 
 	err = verify_pkcs7_signature(d, sizeof(*d) + hash_alg->digest_size,
-				     signature, sig_size,
-				     fsverity_keyring,
+				     signature, sig_size, fsverity_keyring,
 				     VERIFYING_UNSPECIFIED_SIGNATURE,
 				     NULL, NULL);
 	kfree(d);
