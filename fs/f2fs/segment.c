@@ -2544,7 +2544,7 @@ static int is_next_segment_free(struct f2fs_sb_info *sbi,
  * Find a new segment from the free segments bitmap to right order
  * This function should be returned with success, otherwise BUG
  */
-static int get_new_segment(struct f2fs_sb_info *sbi,
+static void get_new_segment(struct f2fs_sb_info *sbi,
 			unsigned int *newseg, bool new_sec, int dir)
 {
 	struct free_segmap_info *free_i = FREE_I(sbi);
@@ -2642,7 +2642,6 @@ out_unlock:
 		f2fs_stop_checkpoint(sbi, false, STOP_CP_REASON_FLUSH_FAIL);
 		f2fs_bug_on(sbi, 1);
 	}
-	return ret;
 }
 
 static void reset_curseg(struct f2fs_sb_info *sbi, int type, int modified)
@@ -2728,11 +2727,7 @@ static void new_curseg(struct f2fs_sb_info *sbi, int type, bool new_sec)
 		dir = ALLOC_RIGHT;
 
 	segno = __get_next_segno(sbi, type);
-	if (get_new_segment(sbi, &segno, new_sec, dir)) {
-		curseg->segno = NULL_SEGNO;
-		return;
-	}
-
+	get_new_segment(sbi, &segno, new_sec, dir);
 	curseg->next_segno = segno;
 	reset_curseg(sbi, type, 1);
 	curseg->alloc_type = LFS;
