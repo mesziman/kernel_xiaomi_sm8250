@@ -772,7 +772,6 @@ static ssize_t f2fs_sb_feature_show(struct f2fs_attr *a,
 		struct f2fs_sb_info *sbi, char *buf)
 {
 	if (F2FS_HAS_FEATURE(sbi, a->id))
->>>>>>> ja2/linux-4.19.y
 		return sprintf(buf, "supported\n");
 	return sprintf(buf, "unsupported\n");
 }
