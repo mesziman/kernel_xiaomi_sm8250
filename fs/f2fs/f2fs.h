@@ -272,11 +272,12 @@ enum {
 
 /* for the list of ino */
 enum {
-	ORPHAN_INO,		/* for orphan ino list */
-	APPEND_INO,		/* for append ino list */
-	UPDATE_INO,		/* for update ino list */
+	ORPHAN_INO,		    /* for orphan ino list */
+	APPEND_INO,		    /* for append ino list */
+	UPDATE_INO,		    /* for update ino list */
 	TRANS_DIR_INO,		/* for transactions dir ino list */
-	FLUSH_INO,		/* for multiple device flushing */
+	XATTR_DIR_INO,   /* for xattr updated dir ino list */
+	FLUSH_INO,		    /* for multiple device flushing */
 	MAX_INO_ENTRY,		/* max. list */
 };
 
