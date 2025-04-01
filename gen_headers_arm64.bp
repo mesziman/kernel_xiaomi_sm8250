@@ -36,6 +36,7 @@ gen_headers_out_arm64 = [
     "asm/termbits.h",
     "asm/termios.h",
     "asm/types.h",
+    "linux/f2fs.h",
 
     "linux/msm_audio.h",
     "linux/mfd/wcd9xxx/wcd9320_registers.h",
