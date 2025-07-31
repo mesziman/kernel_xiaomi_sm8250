@@ -51,7 +51,6 @@ struct reclaim_state;
 struct capture_control;
 struct robust_list_head;
 struct sched_attr;
-struct sched_param;
 struct seq_file;
 struct sighand_struct;
 struct signal_struct;
@@ -366,6 +365,11 @@ enum uclamp_id {
 	UCLAMP_CNT
 };
 
+struct sched_param {
+	int sched_priority;
+};
+
+
 struct sched_info {
 #ifdef CONFIG_SCHED_INFO
 	/* Cumulative counters: */
@@ -552,6 +556,7 @@ struct sched_entity {
 #endif
 
 #ifdef CONFIG_SMP
+
 	/*
 	 * Per entity load average tracking.
 	 *
@@ -793,6 +798,7 @@ struct uclamp_se {
 	unsigned int user_defined	: 1;
 };
 #endif /* CONFIG_UCLAMP_TASK */
+
 
 union rcu_special {
 	struct {
