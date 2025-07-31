@@ -2405,41 +2405,6 @@ enum compact_result try_to_compact_pages(gfp_t gfp_mask, unsigned int order,
 	return rc;
 }
 
-/*
- * Compact all zones within a node till each zone's fragmentation score
- * reaches within proactive compaction thresholds (as determined by the
- * proactiveness tunable).
- *
- * It is possible that the function returns before reaching score targets
- * due to various back-off conditions, such as, contention on per-node or
- * per-zone locks.
- */
-static void proactive_compact_node(pg_data_t *pgdat)
-{
-	int zoneid;
-	struct zone *zone;
-	struct compact_control cc = {
-		.order = -1,
-		.mode = MIGRATE_SYNC_LIGHT,
-		.ignore_skip_hint = true,
-		.whole_zone = true,
-		.gfp_mask = GFP_KERNEL,
-		.proactive_compaction = true,
-	};
-
-	for (zoneid = 0; zoneid < MAX_NR_ZONES; zoneid++) {
-		zone = &pgdat->node_zones[zoneid];
-		if (!populated_zone(zone))
-			continue;
-
-		cc.zone = zone;
-
-		compact_zone(&cc, NULL);
-
-		VM_BUG_ON(!list_empty(&cc.freepages));
-		VM_BUG_ON(!list_empty(&cc.migratepages));
-	}
-}
 static struct workqueue_struct *compaction_wq;
 static struct delayed_work compaction_work;
 static bool screen_on = true;
