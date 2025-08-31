@@ -5749,6 +5749,7 @@ CONFIG_KSU=y
 CONFIG_KSU_LSM_SECURITY_HOOKS=y
 
 #
+<<<<<<< HEAD
 # KernelSU - SUSFS
 #
 CONFIG_KSU_SUSFS=y
@@ -5767,6 +5768,8 @@ CONFIG_KSU_SUSFS_ENABLE_LOG=y
 # CONFIG_KSU_SUSFS_OPEN_REDIRECT is not set
 
 #
+=======
+>>>>>>> e8a1dc6aae7c (KernelSU : update)
 # File systems
 #
 CONFIG_DCACHE_WORD_ACCESS=y
