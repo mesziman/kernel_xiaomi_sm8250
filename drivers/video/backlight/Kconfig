@@ -15,7 +15,7 @@ if BACKLIGHT_LCD_SUPPORT
 #
 config LCD_CLASS_DEVICE
         tristate "Lowlevel LCD controls"
-	default n
+	default y
 	help
 	  This framework adds support for low-level control of LCD.
 	  Some framebuffer devices connect to platform-specific LCD modules
@@ -228,7 +228,7 @@ config BACKLIGHT_LM3533
 config BACKLIGHT_LOCOMO
 	tristate "Sharp LOCOMO LCD/Backlight Driver"
 	depends on SHARP_LOCOMO
-	default n
+	default y
 	help
 	  If you have a Sharp Zaurus SL-5500 (Collie) or SL-5600 (Poodle) say y to
 	  enable the LCD/backlight driver.
@@ -236,7 +236,7 @@ config BACKLIGHT_LOCOMO
 config BACKLIGHT_OMAP1
 	tristate "OMAP1 PWL-based LCD Backlight"
 	depends on ARCH_OMAP1
-	default n
+	default y
 	help
 	  This driver controls the LCD backlight level and power for
 	  the PWL module of OMAP1 processors.  Say Y if your board
@@ -245,7 +245,7 @@ config BACKLIGHT_OMAP1
 config BACKLIGHT_HP680
 	tristate "HP Jornada 680 Backlight Driver"
 	depends on SH_HP6XX
-	default n
+	default y
 	help
 	  If you have a HP Jornada 680, say y to enable the
 	  backlight driver.
@@ -253,7 +253,7 @@ config BACKLIGHT_HP680
 config BACKLIGHT_HP700
 	tristate "HP Jornada 700 series Backlight Driver"
 	depends on SA1100_JORNADA720_SSP && !PREEMPT
-	default n
+	default y
 	help
 	  If you have an HP Jornada 700 series,
 	  say Y to include backlight control driver.
