@@ -949,36 +949,6 @@ static void usbpd_update_pps_status(struct usbpd_pm *pdpm)
 	}
 }
 
-static void usbpd_fc2_exit_work(struct work_struct *work)
-{
-	struct usbpd_pm *pdpm =
-		container_of(work, struct usbpd_pm, fc2_exit_work.work);
-
-	while (pdpm->cp.vbus_volt > 6000) {
-		if (!pdpm->fc2_exit_flag) {
-			pr_info("fc2_exit_flag:false, break.\n");
-			return;
-		}
-
-		pdpm->request_voltage -= 500;
-		pr_info("request_voltage:%d.\n", pdpm->request_voltage);
-		if (pdpm->request_voltage < 5500) {
-			pr_info("request_voltage < 5.5V, break.\n");
-			break;
-		}
-		usbpd_select_pdo(pdpm->pd, pdpm->apdo_selected_pdo,
-				 pdpm->request_voltage * 1000,
-				 pdpm->request_current * 1000);
-		msleep(500);
-		usbpd_pm_update_cp_status(pdpm);
-		pr_info("vbus_mv:%d.\n", pdpm->cp.vbus_volt);
-	}
-
-	pr_info("%s:select default 5V.\n", __func__);
-	usbpd_select_pdo(pdpm->pd, 1, 0, 0);
-	pdpm->fc2_exit_flag = false;
-}
-
 int pd_log_count = 0;
 #define TAPER_TIMEOUT (10000 / PM_WORK_RUN_QUICK_INTERVAL)
 #define IBUS_CHANGE_TIMEOUT (1000 / PM_WORK_RUN_QUICK_INTERVAL)
@@ -1452,7 +1422,6 @@ static int usbpd_pm_sm(struct usbpd_pm *pdpm)
 		} else {
 			pr_info("batt_volt-%d is ok, start flash charging\n",
 				pdpm->cp.vbat_volt);
-			pdpm->fc2_exit_flag = false;
 			usbpd_pm_move_state(pdpm, PD_PM_STATE_FC2_ENTRY);
 		}
 		break;
@@ -1649,14 +1618,7 @@ static int usbpd_pm_sm(struct usbpd_pm *pdpm)
 		break;
 
 	case PD_PM_STATE_FC2_EXIT:
-		if (!pdpm->fc2_exit_flag) {
-			if (pdpm->cp.vbus_volt > 6000) {
-				pdpm->fc2_exit_flag = true;
-				schedule_delayed_work(&pdpm->fc2_exit_work, 0);
-			} else {
-				usbpd_select_pdo(pdpm->pd, 1, 0, 0);
-			}
-		}
+    usbpd_select_pdo(pdpm->pd, 1, 0, 0);
 		pdpm->no_need_en_slave_bq = false;
 		pdpm->master_ibus_below_critical_low_count = 0;
 		pdpm->chip_ok_count = 0;
@@ -1666,14 +1628,6 @@ static int usbpd_pm_sm(struct usbpd_pm *pdpm)
 			vote(pdpm->fcc_votable, BQ_TAPER_CELL_HGIH_FCC_VOTER,
 			     false, 0);
 		}
-
-		if (stop_sw && pdpm->sw.charge_enabled)
-			usbpd_pm_enable_sw(pdpm, false);
-		else if (!stop_sw && !pdpm->sw.charge_enabled)
-			usbpd_pm_enable_sw(pdpm, true);
-
-		msleep(50);
-		usbpd_pm_check_sw_enabled(pdpm);
 
 #if defined(CONFIG_CHARGER_LN8000)
 		if (pm_config.cp_sec_enable && pdpm->cp_sec.charge_enabled) {
@@ -1696,6 +1650,15 @@ static int usbpd_pm_sm(struct usbpd_pm *pdpm)
 			usbpd_pm_check_cp_sec_enabled(pdpm);
 		}
 #endif
+
+		if (stop_sw && pdpm->sw.charge_enabled)
+			usbpd_pm_enable_sw(pdpm, false);
+		else if (!stop_sw && !pdpm->sw.charge_enabled)
+			usbpd_pm_enable_sw(pdpm, true);
+
+		msleep(50);
+		usbpd_pm_check_sw_enabled(pdpm);
+
 
 		if (recover)
 			usbpd_pm_move_state(pdpm, PD_PM_STATE_ENTRY);
@@ -1758,7 +1721,6 @@ static void usbpd_pm_disconnect(struct usbpd_pm *pdpm)
 	pdpm->jeita_triggered = false;
 	pdpm->is_temp_out_fc2_range = false;
 	pdpm->no_need_en_slave_bq = false;
-	pdpm->fc2_exit_flag = false;
 	pdpm->apdo_selected_pdo = 0;
 	pdpm->over_cell_vol_high_count = 0;
 	pdpm->slave_bq_disabled_check_count = 0;
@@ -2064,7 +2026,6 @@ static int usbpd_pm_probe(struct platform_device *pdev)
 	INIT_WORK(&pdpm->cp_psy_change_work, cp_psy_change_work);
 	INIT_WORK(&pdpm->usb_psy_change_work, usb_psy_change_work);
 	INIT_DELAYED_WORK(&pdpm->pm_work, usbpd_pm_workfunc);
-	INIT_DELAYED_WORK(&pdpm->fc2_exit_work, usbpd_fc2_exit_work);
 
 	pdpm->nb.notifier_call = usbpd_psy_notifier_cb;
 	power_supply_reg_notifier(&pdpm->nb);
@@ -2076,7 +2037,6 @@ static int usbpd_pm_remove(struct platform_device *pdev)
 {
 	power_supply_unreg_notifier(&__pdpm->nb);
 	cancel_delayed_work_sync(&__pdpm->pm_work);
-	cancel_delayed_work_sync(&__pdpm->fc2_exit_work);
 	cancel_work_sync(&__pdpm->cp_psy_change_work);
 	cancel_work_sync(&__pdpm->usb_psy_change_work);
 
