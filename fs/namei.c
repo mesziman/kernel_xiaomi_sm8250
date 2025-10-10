@@ -1667,9 +1667,6 @@ static struct dentry *__lookup_hash(const struct qstr *name,
 #endif
 	struct dentry *old;
 	struct inode *dir = base->d_inode;
-#ifdef CONFIG_KSU_SUSFS_SUS_PATH
-	int error;
-#endif
 
 #ifdef CONFIG_KSU_SUSFS_SUS_PATH
 	if (base && base->d_inode && !found_sus_path) {
