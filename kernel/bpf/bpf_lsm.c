@@ -55,6 +55,8 @@ static const struct bpf_func_proto *
 bpf_lsm_func_proto(enum bpf_func_id func_id, const struct bpf_prog *prog)
 {
 	switch (func_id) {
+	case BPF_FUNC_trace_printk:
+		return bpf_get_trace_printk_proto();
 	case BPF_FUNC_inode_storage_get:
 		return &bpf_inode_storage_get_proto;
 	case BPF_FUNC_inode_storage_delete:
@@ -64,7 +66,8 @@ bpf_lsm_func_proto(enum bpf_func_id func_id, const struct bpf_prog *prog)
 	case BPF_FUNC_sk_storage_delete:
 		return &bpf_sk_storage_delete_proto;
 	default:
-		return tracing_prog_func_proto(func_id, prog);
+		pr_debug("Invalid fuse bpf func %d\n", func_id);
+		return NULL;
 	}
 }
 
